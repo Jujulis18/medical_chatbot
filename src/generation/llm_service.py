@@ -176,7 +176,7 @@ class OpenAILLMService(LLMService):
     def generate(self, question: str, context: str) -> str:
         """Générer une réponse via l'API OpenAI"""
         # Implémentation exemple (nécessite la clé API OpenAI)
-        prompt = f"""Tu es un assistant médical. Réponds à la question suivante en te basant sur le contexte fourni.
+        prompt = f"""Tu es un assistant médical expert. Réponds à la question suivante .
 
 Contexte médical:
 {context}
