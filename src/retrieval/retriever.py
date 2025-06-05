@@ -41,67 +41,177 @@ class SimpleRetriever(Retriever):
         # Charger les documents médicaux par défaut
         self._load_default_medical_documents()
     
-    def _load_default_medical_documents(self):
-        """Charger quelques documents médicaux de base"""
-        medical_docs = [
-            {
-                "title": "Grippe - Symptômes",
-                "content": """La grippe (influenza) est une infection virale qui affecte principalement le système respiratoire. 
-                Les symptômes typiques incluent: fièvre élevée (38-40°C), maux de tête sévères, courbatures et douleurs musculaires, 
-                fatigue intense, toux sèche, mal de gorge, écoulement nasal. Les symptômes apparaissent généralement brutalement 
-                et durent entre 5 à 7 jours. La grippe est très contagieuse et se transmet par les gouttelettes respiratoires."""
-            },
-            {
-                "title": "Hypertension artérielle",
-                "content": """L'hypertension artérielle est définie par une pression artérielle systolique ≥ 140 mmHg et/ou 
-                une pression diastolique ≥ 90 mmHg. C'est un facteur de risque majeur de maladies cardiovasculaires. 
-                Souvent asymptomatique, elle peut causer maux de tête, vertiges, troubles visuels. Le traitement comprend 
-                des mesures hygiéno-diététiques (réduction du sel, exercice, perte de poids) et des médicaments antihypertenseurs 
-                si nécessaire."""
-            },
-            {
-                "title": "Diabète de type 2",
-                "content": """Le diabète de type 2 est caractérisé par une résistance à l'insuline et/ou un déficit relatif 
-                en insuline. Les symptômes incluent: polyurie (urination fréquente), polydipsie (soif excessive), 
-                polyphagie (faim excessive), perte de poids inexpliquée, fatigue, vision floue, cicatrisation lente. 
-                Le diagnostic se fait par glycémie à jeun ≥ 1,26 g/L ou HbA1c ≥ 6,5%. Le traitement associe régime, 
-                exercice et médicaments antidiabétiques."""
-            },
-            {
-                "title": "Angine - Mal de gorge",
-                "content": """L'angine est une inflammation des amygdales, le plus souvent d'origine virale (70%) ou bactérienne (30%). 
-                Symptômes: mal de gorge intense, dysphagie, fièvre, adénopathies cervicales. L'angine virale guérit spontanément. 
-                L'angine bactérienne (streptocoque A) nécessite un traitement antibiotique (amoxicilline). Le test de diagnostic 
-                rapide (TDR) permet de différencier angine virale et bactérienne."""
-            },
-            {
-                "title": "Migraine",
-                "content": """La migraine est un type de céphalée primaire caractérisée par des crises récurrentes. 
-                Symptômes typiques: céphalée unilatérale, pulsatile, d'intensité modérée à sévère, aggravée par l'effort, 
-                accompagnée de nausées/vomissements, photophobie, phonophobie. Certaines migraines sont précédées d'aura 
-                (troubles visuels, sensitifs). Le traitement comprend antalgiques pour la crise et traitements de fond 
-                si crises fréquentes."""
-            },
-            {
-                "title": "Asthme",
-                "content": """L'asthme est une maladie inflammatoire chronique des voies respiratoires. Symptômes: dyspnée, 
-                sifflements, oppression thoracique, toux surtout nocturne. Les crises peuvent être déclenchées par 
-                allergènes, effort, stress, infections. Le diagnostic repose sur la spirométrie montrant un trouble 
-                ventilatoire obstructif réversible. Traitement: bronchodilatateurs d'action rapide pour les crises, 
-                corticoïdes inhalés comme traitement de fond."""
-            },
-            {
-                "title": "Gastro-entérite",
-                "content": """La gastro-entérite est une inflammation du tube digestif, souvent d'origine virale (norovirus, rotavirus). 
-                Symptômes: diarrhée aqueuse, nausées, vomissements, douleurs abdominales, parfois fièvre. 
-                La déshydratation est le principal risque, surtout chez les enfants et personnes âgées. 
-                Traitement symptomatique: réhydratation orale, régime alimentaire adapté, antiémétiques si besoin. 
-                Évolution favorable en 2-3 jours."""
-            }
-        ]
+   import numpy as np
+import pandas as pd
+import os
+from typing import List, Dict, Any
+
+def load_default_medical_documents(embeddings_path: str = "data/embeddings/embeddings.npy",
+                                 chunks_path: str = "data/processed/chunks.csv") -> Dict[str, Any]:
+    """
+    Charge les documents médicaux depuis chunks.csv avec leurs embeddings pré-calculés.
+    
+    Args:
+        embeddings_path: Chemin vers le fichier d'embeddings sauvegardé (.npy)
+        chunks_path: Chemin vers le fichier CSV contenant les chunks de documents
         
-        documents = [Document(content=doc["content"], title=doc["title"]) for doc in medical_docs]
-        self.add_documents(documents)
+    Returns:
+        Dict contenant les documents et leurs embeddings
+    """
+    
+    try:
+        # Vérifier que les fichiers existent
+        if not os.path.exists(embeddings_path):
+            raise FileNotFoundError(f"Fichier d'embeddings non trouvé: {embeddings_path}")
+            
+        if not os.path.exists(chunks_path):
+            raise FileNotFoundError(f"Fichier chunks non trouvé: {chunks_path}")
+        
+        # Charger les embeddings pré-calculés
+        print(f"Chargement des embeddings depuis {embeddings_path}...")
+        embeddings = np.load(embeddings_path)
+        print(f"Embeddings chargés: {embeddings.shape}")
+        
+        # Charger les chunks depuis le CSV
+        print(f"Chargement des chunks depuis {chunks_path}...")
+        chunks_df = pd.read_csv(chunks_path)
+        print(f"Chunks chargés: {len(chunks_df)} lignes")
+        
+        # Vérifier la cohérence entre le nombre de chunks et d'embeddings
+        if len(chunks_df) != embeddings.shape[0]:
+            print(f"ATTENTION: Nombre de chunks ({len(chunks_df)}) ne correspond pas "
+                  f"au nombre d'embeddings ({embeddings.shape[0]})")
+            # Prendre le minimum pour éviter les erreurs d'index
+            min_length = min(len(chunks_df), embeddings.shape[0])
+            chunks_df = chunks_df.iloc[:min_length]
+            embeddings = embeddings[:min_length]
+            print(f"Ajustement: utilisation des {min_length} premiers éléments")
+        
+        # Convertir les chunks en format de documents
+        documents_data = []
+        for idx, row in chunks_df.iterrows():
+            doc = {
+                'id': idx,
+                'chunk_id': row.get('chunk_id', idx),
+                'source': row.get('source', 'Unknown'),
+                'content': row.get('content', row.get('text', '')),
+                'embedding_index': idx
+            }
+            
+            # Ajouter d'autres colonnes si elles existent
+            for col in chunks_df.columns:
+                if col not in ['chunk_id', 'source', 'content', 'text']:
+                    doc[col] = row[col]
+                    
+            documents_data.append(doc)
+        
+        # Structurer les données
+        medical_knowledge_base = {
+            'documents': documents_data,
+            'embeddings': embeddings,
+            'chunks_df': chunks_df,  # Garder le DataFrame original pour référence
+            'metadata': {
+                'num_documents': len(documents_data),
+                'embedding_dimension': embeddings.shape[1],
+                'embeddings_source': embeddings_path,
+                'chunks_source': chunks_path,
+                'columns': list(chunks_df.columns)
+            }
+        }
+        
+        print(f"Base de connaissances médicales chargée avec succès:")
+        print(f"- {len(documents_data)} documents/chunks")
+        print(f"- Dimension des embeddings: {embeddings.shape[1]}")
+        print(f"- Colonnes disponibles: {list(chunks_df.columns)}")
+        
+        return medical_knowledge_base
+        
+    except FileNotFoundError as e:
+        print(f"Erreur: {e}")
+        print("Assurez-vous que les fichiers d'embeddings et de chunks existent.")
+        return None
+        
+    except Exception as e:
+        print(f"Erreur lors du chargement: {e}")
+        return None
+
+
+def get_document_by_index(knowledge_base: Dict[str, Any], index: int) -> Dict[str, Any]:
+    """
+    Récupère un document spécifique par son index.
+    
+    Args:
+        knowledge_base: Base de connaissances chargée
+        index: Index du document à récupérer
+        
+    Returns:
+        Document correspondant à l'index
+    """
+    if knowledge_base is None or index >= len(knowledge_base['documents']):
+        return None
+    
+    return knowledge_base['documents'][index]
+
+
+def search_similar_documents(knowledge_base: Dict[str, Any], 
+                           query_embedding: np.ndarray, 
+                           top_k: int = 5) -> List[Dict[str, Any]]:
+    """
+    Recherche les documents les plus similaires à un embedding de requête.
+    
+    Args:
+        knowledge_base: Base de connaissances chargée
+        query_embedding: Embedding de la requête
+        top_k: Nombre de documents à retourner
+        
+    Returns:
+        Liste des documents les plus similaires avec leurs scores
+    """
+    if knowledge_base is None:
+        return []
+    
+    # Calculer la similarité cosinus
+    from sklearn.metrics.pairwise import cosine_similarity
+    
+    similarities = cosine_similarity([query_embedding], knowledge_base['embeddings'])[0]
+    
+    # Obtenir les indices des top_k documents les plus similaires
+    top_indices = np.argsort(similarities)[::-1][:top_k]
+    
+    results = []
+    for idx in top_indices:
+        doc = knowledge_base['documents'][idx].copy()
+        doc['similarity_score'] = float(similarities[idx])
+        results.append(doc)
+    
+    return results
+
+
+def initialize_medical_chatbot(embeddings_path: str = "data/embeddings/embeddings.npy"):
+    """
+    Initialise le chatbot médical avec les embeddings pré-calculés.
+    
+    Args:
+        embeddings_path: Chemin vers les embeddings sauvegardés
+        
+    Returns:
+        Base de connaissances médicales initialisée
+    """
+    
+    print("Initialisation du chatbot médical...")
+    
+    # Charger la base de connaissances avec les embeddings pré-calculés
+    knowledge_base = load_default_medical_documents(embeddings_path)
+    
+    if knowledge_base is None:
+        print("Échec de l'initialisation du chatbot médical")
+        return None
+    
+    print("Chatbot médical initialisé avec succès!")
+    return knowledge_base
+
+
+
     
     def add_documents(self, documents: List[Document]):
         """Ajouter des documents à l'index"""
@@ -278,3 +388,5 @@ if __name__ == "__main__":
                 print(f"   {result['content'][:100]}...")
         else:
             print("Aucun document pertinent trouvé")
+
+            
