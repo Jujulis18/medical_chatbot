@@ -20,9 +20,10 @@ def main():
         settings_panel = SettingsPanel()
         settings = settings_panel.render()
     
+    st.write("premier affichage")
     # Interface principale de chat
-    chat_interface = ChatInterface(settings)
-    chat_interface.render()
+    #chat_interface = ChatInterface(settings)
+    #chat_interface.render()
 
 if __name__ == "__main__":
     main()
