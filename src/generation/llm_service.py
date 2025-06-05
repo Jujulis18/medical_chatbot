@@ -162,7 +162,7 @@ class SimpleLLMService(LLMService):
             return f"Je suis désolé, mais je n'ai pas pu traiter votre question correctement. Erreur: {str(e)}\n\nPour obtenir des informations médicales fiables, veuillez consulter un professionnel de santé."
 
 class OpenAILLMService(LLMService):
-    """Service LLM utilisant l'API OpenAI (exemple d'implémentation)"""
+    """Service LLM utilisant l'API OpenAI"""
     
     def __init__(self, api_key: str, model: str = "gpt-3.5-turbo", temperature: float = 0.7, max_tokens: int = 500):
         self.api_key = api_key
@@ -170,54 +170,66 @@ class OpenAILLMService(LLMService):
         self.temperature = temperature
         self.max_tokens = max_tokens
         
-        # Note: Vous devez installer openai avec: pip install openai
-        # self.client = OpenAI(api_key=api_key)
+        # Importer OpenAI
+        try:
+            from openai import OpenAI
+            self.client = OpenAI(api_key=api_key)
+        except ImportError:
+            raise ImportError("Installez openai avec: pip install openai")
         
     def generate(self, question: str, context: str) -> str:
         """Générer une réponse via l'API OpenAI"""
-        # Implémentation exemple (nécessite la clé API OpenAI)
-       prompt = """
-            Tu es un médecin expérimenté et bienveillant. Tu dois :
+        
+        system_prompt = """
+        Tu es un médecin expérimenté et bienveillant. Tu dois :
 
-            1. ANALYSER les symptômes du patient avec attention
-            2. POSER des questions de diagnostic pertinentes 
-            3. DONNER des conseils médicaux basés sur les informations trouvées
-            4. EXPLIQUER de manière claire et rassurante
+        1. ANALYSER les symptômes du patient avec attention
+        2. POSER des questions de diagnostic pertinentes 
+        3. DONNER des conseils médicaux basés sur les informations trouvées
+        4. EXPLIQUER de manière claire et rassurante
 
-            Quand tu reçois des informations médicales de la base de données :
-            - Lis attentivement le contenu (même s'il est en anglais)
-            - Interprète les informations pour le patient
-            - Pose des questions de suivi pour affiner le diagnostic
-            - Donne des conseils pratiques
-            - Recommande si nécessaire de consulter un spécialiste
+        Quand tu reçois des informations médicales de la base de données :
+        - Lis attentivement le contenu (même s'il est en anglais)
+        - Interprète les informations pour le patient
+        - Pose des questions de suivi pour affiner le diagnostic
+        - Donne des conseils pratiques
+        - Recommande si nécessaire de consulter un spécialiste
 
-            Réponds TOUJOURS en français, même si les documents sont en anglais.
-            Sois empathique et professionnel.
+        Réponds TOUJOURS en français, même si les documents sont en anglais.
+        Sois empathique et professionnel.
 
-            Format de réponse souhaité :
-            - Analyse des symptômes
-            - Questions de diagnostic
-            - Conseils/recommandations
-            - Quand consulter en urgence
-            """
+        Format de réponse souhaité :
+        - Analyse des symptômes
+        - Questions de diagnostic
+        - Conseils/recommandations
+        - Quand consulter en urgence
+        """
+        
+        user_prompt = f"""
+        Le patient me dit : "{question}"
+        
+        Voici les informations trouvées dans ma base de données médicale :
+        {context}
+        
+        En tant que médecin, analyse ces informations et réponds au patient de manière professionnelle et empathique.
+        """
+        
         try:
-            # Code d'exemple - à décommenter si vous avez une clé API OpenAI
-            # response = self.client.chat.completions.create(
-            #     model=self.model,
-            #     messages=[
-            #         {"role": "system", "content": "Tu es un assistant médical expert."},
-            #         {"role": "user", "content": prompt}
-            #     ],
-            #     temperature=self.temperature,
-            #     max_tokens=self.max_tokens
-            # )
-            # return response.choices[0].message.content
-            
-            return "Service OpenAI non configuré. Veuillez configurer votre clé API."
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            return response.choices[0].message.content
             
         except Exception as e:
             return f"Erreur lors de l'appel à l'API OpenAI: {str(e)}"
 
+            
 # Factory function pour créer le bon service LLM
 def create_llm_service(service_type: str = "simple", **kwargs) -> LLMService:
     """Créer un service LLM approprié"""
@@ -244,7 +256,7 @@ if __name__ == "__main__":
     print("Test du service LLM...")
     
     # Créer le service
-    llm_service = create_llm_service("simple")
+    llm_service = create_llm_service("openai")
     
     # Contexte de test
     context = """La grippe (influenza) est une infection virale qui affecte principalement le système respiratoire. 
