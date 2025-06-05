@@ -1,3 +1,5 @@
+from typing import Dict
+
 class RAGPipeline:
     def __init__(self, retriever, llm_service, embedding_service):
         self.retriever = retriever
