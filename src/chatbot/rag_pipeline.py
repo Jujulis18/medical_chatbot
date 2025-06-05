@@ -5,9 +5,9 @@ import sys
 # Ajouter le chemin du projet pour les imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from embedding_service import SentenceTransformerEmbedding
-from retriever import SimpleRetriever
-from llm_service import SimpleLLMService
+from src.embeddings.embedding_service import SentenceTransformerEmbedding
+from src.retrieval.retriever import SimpleRetriever
+from src.generation.llm_service import SimpleLLMService
 
 class RAGPipeline:
     def __init__(self, retriever, llm_service, embedding_service):

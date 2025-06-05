@@ -2,12 +2,9 @@ from abc import ABC, abstractmethod
 from typing import List
 import numpy as np
 
-try:
-    from sentence_transformers import SentenceTransformer
-    SENTENCE_TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    print("Warning: sentence-transformers not installed. Install with: pip install sentence-transformers")
-    SENTENCE_TRANSFORMERS_AVAILABLE = False
+from sentence_transformers import SentenceTransformer
+SENTENCE_TRANSFORMERS_AVAILABLE = True
+
 
 class EmbeddingService(ABC):
     """Service abstrait pour générer des embeddings"""
