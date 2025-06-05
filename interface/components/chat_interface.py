@@ -133,7 +133,7 @@ class ChatInterface:
                     print(f"Erreur lors du traitement de la question: {e}")
             
             # Afficher la réponse
-            ##response_container.write(answer)
+            response_container.write(answer)
             
             # Afficher les sources si disponibles
             if sources and st.session_state.get("show_sources", True):
