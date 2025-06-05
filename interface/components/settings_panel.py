@@ -30,7 +30,7 @@ class SettingsPanel:
             self._rebuild_index()
         
         return {
-            "embedding_service": embedding_model,
+            "embedding_model": embedding_model,
             "top_k": top_k,
             "similarity_threshold": similarity_threshold,
             "temperature": temperature,
@@ -41,5 +41,7 @@ class SettingsPanel:
         with st.spinner("Reconstruction de l'index..."):
             # Logique pour reconstruire l'index
             st.success("Index reconstruit avec succès !")
+
+
 
             
