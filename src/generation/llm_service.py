@@ -98,3 +98,155 @@ class SimpleLLMService(LLMService):
             r"se fait par\s*:?\s*([^.]*)",
             r"repose sur\s*:?\s*([^.]*)"
         ]
+        
+        diagnoses = []
+        for pattern in diagnosis_patterns:
+            matches = re.findall(pattern, context)
+            diagnoses.extend(matches)
+        
+        # Nettoyer et formater les résultats
+        def clean_text(text_list):
+            cleaned = []
+            for text in text_list:
+                text = text.strip()
+                if text and len(text) > 10:  # Éviter les fragments trop courts
+                    cleaned.append(text)
+            return cleaned
+        
+        result = {
+            "symptoms": ", ".join(clean_text(symptoms)[:3]),  # Max 3 éléments
+            "treatment": ", ".join(clean_text(treatments)[:3]),
+            "diagnosis": ", ".join(clean_text(diagnoses)[:3]),
+            "info": context[:200] + "..." if len(context) > 200 else context
+        }
+        
+        return result
+    
+    def generate(self, question: str, context: str) -> str:
+        """Générer une réponse basée sur la question et le contexte"""
+        try:
+            # Identifier le type de question
+            question_type = self._identify_question_type(question)
+            
+            # Extraire les informations du contexte
+            info = self._extract_key_information(context)
+            
+            # Choisir le template approprié
+            templates = self.response_templates.get(question_type, self.response_templates["général"])
+            
+            # Sélectionner un template (simple rotation)
+            template_index = hash(question) % len(templates)
+            template = templates[template_index]
+            
+            # Formater la réponse
+            if question_type == "symptômes" and info["symptoms"]:
+                response = template.format(symptoms=info["symptoms"])
+            elif question_type == "traitement" and info["treatment"]:
+                response = template.format(treatment=info["treatment"])
+            elif question_type == "diagnostic" and info["diagnosis"]:
+                response = template.format(diagnosis=info["diagnosis"])
+            else:
+                response = template.format(info=info["info"])
+            
+            # Ajouter une note de sécurité
+            safety_note = "\n\n⚠️ Cette information est fournie à titre éducatif uniquement. Pour un diagnostic ou un traitement personnalisé, consultez toujours un professionnel de santé qualifié."
+            
+            # Limiter la longueur de la réponse
+            max_length = min(self.max_tokens * 4, 1000)  # Approximation 4 chars par token
+            if len(response) > max_length:
+                response = response[:max_length] + "..."
+            
+            return response + safety_note
+            
+        except Exception as e:
+            return f"Je suis désolé, mais je n'ai pas pu traiter votre question correctement. Erreur: {str(e)}\n\nPour obtenir des informations médicales fiables, veuillez consulter un professionnel de santé."
+
+class OpenAILLMService(LLMService):
+    """Service LLM utilisant l'API OpenAI (exemple d'implémentation)"""
+    
+    def __init__(self, api_key: str, model: str = "gpt-3.5-turbo", temperature: float = 0.7, max_tokens: int = 500):
+        self.api_key = api_key
+        self.model = model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        
+        # Note: Vous devez installer openai avec: pip install openai
+        # self.client = OpenAI(api_key=api_key)
+        
+    def generate(self, question: str, context: str) -> str:
+        """Générer une réponse via l'API OpenAI"""
+        # Implémentation exemple (nécessite la clé API OpenAI)
+        prompt = f"""Tu es un assistant médical. Réponds à la question suivante en te basant sur le contexte fourni.
+
+Contexte médical:
+{context}
+
+Question: {question}
+
+Réponds de manière précise et professionnelle. Rappelle toujours que tes réponses sont à titre informatif et qu'il faut consulter un professionnel de santé pour un diagnostic ou traitement personnalisé."""
+
+        try:
+            # Code d'exemple - à décommenter si vous avez une clé API OpenAI
+            # response = self.client.chat.completions.create(
+            #     model=self.model,
+            #     messages=[
+            #         {"role": "system", "content": "Tu es un assistant médical expert."},
+            #         {"role": "user", "content": prompt}
+            #     ],
+            #     temperature=self.temperature,
+            #     max_tokens=self.max_tokens
+            # )
+            # return response.choices[0].message.content
+            
+            return "Service OpenAI non configuré. Veuillez configurer votre clé API."
+            
+        except Exception as e:
+            return f"Erreur lors de l'appel à l'API OpenAI: {str(e)}"
+
+# Factory function pour créer le bon service LLM
+def create_llm_service(service_type: str = "simple", **kwargs) -> LLMService:
+    """Créer un service LLM approprié"""
+    if service_type == "simple":
+        return SimpleLLMService(
+            temperature=kwargs.get("temperature", 0.7),
+            max_tokens=kwargs.get("max_tokens", 500)
+        )
+    elif service_type == "openai":
+        api_key = kwargs.get("api_key")
+        if not api_key:
+            raise ValueError("Clé API OpenAI requise pour le service OpenAI")
+        return OpenAILLMService(
+            api_key=api_key,
+            model=kwargs.get("model", "gpt-3.5-turbo"),
+            temperature=kwargs.get("temperature", 0.7),
+            max_tokens=kwargs.get("max_tokens", 500)
+        )
+    else:
+        raise ValueError(f"Type de service LLM non supporté: {service_type}")
+
+# Test du service
+if __name__ == "__main__":
+    print("Test du service LLM...")
+    
+    # Créer le service
+    llm_service = create_llm_service("simple")
+    
+    # Contexte de test
+    context = """La grippe (influenza) est une infection virale qui affecte principalement le système respiratoire. 
+    Les symptômes typiques incluent: fièvre élevée (38-40°C), maux de tête sévères, courbatures et douleurs musculaires, 
+    fatigue intense, toux sèche, mal de gorge, écoulement nasal. Le traitement comprend repos, hydratation, 
+    antalgiques et antipyrétiques."""
+    
+    # Questions de test
+    questions = [
+        "Quels sont les symptômes de la grippe ?",
+        "Comment traiter la grippe ?",
+        "Comment diagnostiquer la grippe ?",
+        "Qu'est-ce que la grippe ?"
+    ]
+    
+    for question in questions:
+        print(f"\n--- Question: {question} ---")
+        response = llm_service.generate(question, context)
+        print(f"Réponse: {response}")
+        print("-" * 50)
