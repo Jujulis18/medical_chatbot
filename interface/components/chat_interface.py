@@ -53,7 +53,7 @@ class ChatInterface:
             # Générer la réponse
             with st.chat_message("assistant"):
                 with st.spinner("Recherche en cours..."):
-                    response_data = self.rag_pipeline.query_with_sources(prompt)
+                    response_data = self.rag_pipeline.query(prompt)
                 
                 st.write(response_data["answer"])
                 
