@@ -1,5 +1,6 @@
 from src.vector_store.faiss_store import load_faiss_index
 from src.embeddings.factory import get_embedder
+import numpy as np 
 
 
 class Retriever:
