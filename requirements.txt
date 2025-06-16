@@ -4,4 +4,4 @@ sentence-transformers
 requests
 numpy
 openai
-
+dotenv
