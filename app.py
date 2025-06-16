@@ -34,8 +34,18 @@ if user_input:
 
     with st.chat_message("assistant"):
         with st.spinner("Recherche des informations..."):
-            response = pipeline.run(user_input)
-            st.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
-
-
+            try:
+                response, debug_info = pipeline.run(user_input)
+                
+                # Affichage du debug
+                with st.expander("🔍 Informations de debug"):
+                    for info in debug_info:
+                        st.text(info)
+                
+                st.markdown(response)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                
+            except Exception as e:
+                st.error(f"ERREUR: {str(e)}")
+                import traceback
+                st.code(traceback.format_exc())
