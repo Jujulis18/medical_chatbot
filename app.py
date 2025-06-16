@@ -18,9 +18,9 @@ def init_pipeline():
 	if not api_key:
 	    raise ValueError("Clé API OpenAI non trouvée. Vérifiez votre fichier .env")
 
-    retriever = Retriever(model_name="sbert")
-    generator = OpenAIChatGenerator(api_key=api_key, model="gpt-4")
-    return RAGPipeline(retriever, generator)
+	retriever = Retriever(model_name="sbert")
+	generator = OpenAIChatGenerator(api_key=api_key, model="gpt-4")
+	return RAGPipeline(retriever, generator)
 
 pipeline = init_pipeline()
 
