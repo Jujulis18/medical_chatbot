@@ -1,3 +1,5 @@
+import numpy as np
+
 class RAGPipeline:
     def __init__(self, retriever, generator):
         self.retriever = retriever

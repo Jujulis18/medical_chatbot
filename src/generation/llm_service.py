@@ -1,4 +1,5 @@
 import openai
+import numpy as np
 
 class OpenAIChatGenerator:
     def __init__(self, api_key: str, model="gpt-4"):

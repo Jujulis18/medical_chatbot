@@ -2,6 +2,7 @@
 
 from src.embeddings.openai_embedder import OpenAIEmbedder
 from src.embeddings.sbert_embedder import SBERTEmbedder
+import numpy as np
 
 def get_embedder(model_name: str = "sbert"):
     """

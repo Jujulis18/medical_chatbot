@@ -2,6 +2,7 @@ import streamlit as st
 from src.retrieval.retriever import Retriever
 from src.generation.llm_service import OpenAIChatGenerator
 from src.chatbot.rag_pipeline import RAGPipeline
+import numpy as np
 
 # Initialisation (peut être déplacée dans un cache pour améliorer les performances)
 @st.cache_resource
