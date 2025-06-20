@@ -1,6 +1,6 @@
 import streamlit as st
 from src.retrieval.retriever import Retriever
-from src.generation.llm_service import OpenAIChatGenerator
+from src.generation.llm_service import MISTRALChatGenerator
 from src.chatbot.rag_pipeline import RAGPipeline
 import numpy as np
 import os
@@ -13,20 +13,20 @@ def init_pipeline():
 	load_dotenv()
 
 	# Récupérer la clé API
-	api_key = os.getenv("OPENAI_API_KEY")
+	api_key = os.getenv("MISTRAL_API_KEY")
 
 	if not api_key:
 	    raise ValueError("Clé API OpenAI non trouvée. Vérifiez votre fichier .env")
 
 	retriever = Retriever(model_name="sbert")
-	generator = OpenAIChatGenerator(api_key=api_key, model="gpt-3.5-turbo-instruct")
+	generator = MISTRALChatGenerator(api_key=api_key, model="mistral-small-latest")
 	return RAGPipeline(retriever, generator)
 
 pipeline = init_pipeline()
 
 # Interface utilisateur
 st.set_page_config(page_title="Chatbot Médical RAG")
-st.title("🧠 Chatbot Médical basé sur RAG")
+st.title("Chatbot Médical basé sur RAG")
 
 # Historique de conversation
 if "messages" not in st.session_state:
@@ -50,7 +50,7 @@ if user_input:
                 response, debug_info = pipeline.run(user_input)
                 
                 # Affichage du debug
-                with st.expander("🔍 Informations de debug"):
+                with st.expander("Informations de debug"):
                     for info in debug_info:
                         st.text(info)
                 

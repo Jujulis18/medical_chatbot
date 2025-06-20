@@ -1,5 +1,3 @@
-# chatbot/embedding/sbert_embedder.py
-
 from sentence_transformers import SentenceTransformer
 import numpy as np
 

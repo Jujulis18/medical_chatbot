@@ -1,7 +1,6 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
 
-# Exemple : si tu utilises des embeddings SBERT
 embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 def retrieve_similar_chunks(question, top_k=5):

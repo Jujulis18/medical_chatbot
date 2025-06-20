@@ -5,3 +5,4 @@ requests
 numpy
 openai
 dotenv
+mistralai
