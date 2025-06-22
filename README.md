@@ -1,5 +1,5 @@
 # Chatbot Médical 
-**Datasets** : [Liens vers les données Kaggle utilisées]
+**Datasets** : [Liens vers les données Kaggle utilisées](https://www.kaggle.com/datasets/narendrageek/mental-health-faq-for-chatbot)
 
 ## Introduction
 
@@ -32,58 +32,51 @@ Limites des réponses: informations présentes dans la base de données.
 
 ### Génération de Texte
 - **Large Language Models (LLM)** : Génération de réponses
-- **Mistral via OpenAI API ** : Modèles de génération de texte
+- **Mistral via OpenAI API** : Modèles de génération de texte
 
 ### Interface et Déploiement
 - **Streamlit** : Interface utilisateur web
 
 ## Résumé du Projet
 
-Le chatbot médical combine plusieurs technologies de pointe pour créer un système de question-réponse médical robuste. Le pipeline comprend :
+Le pipeline comprend :
 
-1. **Collecte et préparation des données** médicales depuis Kaggle
-2. **Traitement et nettoyage** des données pour assurer la qualité
-3. **Création d'embeddings** pour la recherche sémantique
-4. **Implémentation RAG** (Retrieval-Augmented Generation) avec BERT
-5. **Génération de réponses** via des modèles de langage avancés
-6. **Mise en place de garde-fous** pour la sécurité médicale
-7. **Interface utilisateur** accessible via Streamlit
+1. [**Collecte et préparation des données**](#analyse) médicales depuis Kaggle
+2. [**Traitement et nettoyage**](#nettoyage) des données pour assurer la qualité
+3. [**Création d'embeddings**](#embedding) pour la recherche sémantique
+4. [**Implémentation RAG**](#RAG) (Retrieval-Augmented Generation) avec BERT
+5. [**Génération de réponses**](#generation) via des modèles de langage avancés
+6. [**Mise en place de garde-fous**](#gardefou) pour la sécurité médicale
+7. [**Interface utilisateur**](#interface) accessible via Streamlit
 
 ## Collecte des Données
 
 ### Source : Kaggle
 Les données médicales proviennent de datasets Kaggle soigneusement sélectionnés :
-- **Datasets utilisés** : [Spécifier les datasets exacts]
-- **Volume de données** : [Nombre d'entrées, taille des fichiers]
-- **Types de données** : Symptômes, diagnostics, traitements, FAQ médicales
-- **Format** : CSV, JSON, ou autres formats structurés
+- **Datasets utilisés** : Mental health faq for chatbot
+- **Volume de données** : 98 entrées
+- **Types de données** : date, question, answer about mental health
+- **Format** : CSV
 
-### Critères de Sélection
-- Diversité des sujets médicaux couverts
-- Mise à jour récente des informations
-
-## Analyse et Nettoyage des Données
+## Analyse et Nettoyage des Données <a name="analyse">
 
 ### Analyse Exploratoire
 - **Statistiques descriptives** : Distribution des données, valeurs manquantes
-- **Analyse de qualité** : Détection des doublons, incohérences
+- **Analyse de qualité** : Détection des doublons
 - **Visualisations** : Graphiques de distribution, nuages de mots
 
 ### Processus de Nettoyage
 - **Suppression des doublons** et des entrées corrompues
 - **Normalisation du texte** : Suppression des caractères spéciaux, uniformisation  
 
-## Chunking et Embeddings
+## Chunking et Embeddings <a name="embedding">
 
 ### Stratégie de Chunking
 - **Segmentation intelligente** : Division du contenu en chunks cohérents
-- **Taille optimale** : Equilibre entre contexte et performance
-- **Préservation du sens** : Maintien de l'intégrité sémantique
 
 ### Génération d'Embeddings
 - **Modèle utilisé** : BERT 
-- **Dimension des vecteurs** : [Spécifier la dimension]
-- **Technique d'embedding** : Sentence embeddings pour la recherche sémantique
+- **Dimension des vecteurs** : 
 
 ## Base de Données Vectorielle - FAISS
 
@@ -91,7 +84,7 @@ Les données médicales proviennent de datasets Kaggle soigneusement sélectionn
 - **Type d'index** : IndexFlatL2 
 - **Métriques de distance** : Similarité cosinus 
 
-## RAG avec BERT
+## RAG avec BERT <a name="RAG">
 
 ### Architecture RAG
 - **Retriever** : BERT pour la récupération de documents pertinents
@@ -105,14 +98,15 @@ Les données médicales proviennent de datasets Kaggle soigneusement sélectionn
 ### Prochaine Étape : LLM
 - **Utilisation** de modèles plus avancés 
 - **Personnalisation** des réponses selon le profil utilisateur
+- **Ajout** de database sur d'autres specialités médicales
 
-## Génération de Messages par LLM
+## Génération de Messages par LLM <a name="generation">
 
 ### Modèle de Génération
-- **Architecture** : [Spécifier le modèle LLM utilisé]
+- **Architecture** : mistral-small-latest
 - **Prompting** : Techniques de prompt engineering 
 
-## Garde-Fous
+## Garde-Fous <a name="gardefou">
 
 ### Liste des Garde-Fous Implémentés
 
@@ -125,10 +119,10 @@ Les données médicales proviennent de datasets Kaggle soigneusement sélectionn
 #### Filtrage de Contenu
 - **Détection de contenus sensibles** : Suicide, automutilation, substances illégales
 
-## Interface Utilisateur
+## Interface Utilisateur <a name="interface">
+<img src="https://github.com/user-attachments/assets/c24aed73-b023-4e14-adc0-c967cfd74418" width="500">
 
-### Plateforme Actuelle : Streamlit
-- **Interface web responsive** : Accessible sur desktop et mobile
+🚀 **Application Streamlit** : [Lien vers l'application déployée](https://firstdraft-qoslojm4n4xesvknrpsc3r.streamlit.app/)
 
 ## Prochaines Étapes
 
@@ -137,10 +131,5 @@ Les données médicales proviennent de datasets Kaggle soigneusement sélectionn
 - **Précision des réponses** : Pourcentage de réponses correctes
 - **Temps de réponse** : Latence moyenne du système
 
-
-## Liens et Ressources
-
-### Démonstration
-🚀 **Application Streamlit** : [Lien vers l'application déployée]
 
 
