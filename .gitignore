@@ -1,0 +1,8 @@
+# Secrets
+.env
+*.env
+
+# Autres fichiers à ignorer
+__pycache__/
+*.pyc
+.DS_Store
