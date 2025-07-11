@@ -1,25 +1,22 @@
 # Chatbot Médical
 
 ## Contexte
-Dans le cadre du développement d'un assistant virtuel pour le domaine médical, j'ai été chargé de créer un chatbot capable de fournir des informations de santé fiables et précises. L'objectif était de développer un système utilisant des techniques avancées de traitement du langage naturel (NLP) et de recherche par similarité pour offrir des réponses basées sur des connaissances métiers.
+Dans un contexte où les patients cherchent de plus en plus des réponses rapides à leurs questions de santé, j’ai cherché à concevoir un chatbot médical capable de fournir des informations fiables, compréhensibles, et surtout sécurisées. 
+**Le défi ?** Allier la puissance des modèles de langage actuels avec les exigences du domaine médical.
 
 ## Objectifs
-- **Objectifs principaux** :
-  - Répondre aux questions médicales courantes
-  - Fournir des informations fiables basées sur des sources médicales vérifiées
-- **Objectifs secondaires** :
-  - Maintenir un niveau de sécurité élevé avec des garde-fous appropriés
-  - Offrir une interface utilisateur intuitive et accessible
+L’idée n’est pas de remplacer un professionnel, mais d’aider les utilisateurs à mieux comprendre certains symptômes ou traitements, tout en posant des garde-fous stricts pour éviter tout dérapage.
+
+Objectifs principaux :
+- Répondre aux questions médicales fréquentes
+- Garantir la fiabilité des réponses via des sources vérifiées
+
+Objectifs secondaires :
+- Assurer un haut niveau de sécurité (disclaimers, gestion des urgences…)
+- Offrir une interface simple et accessible à tous
 
 ## Méthodologie
-- **Outils et technologies utilisés** :
-  - Pandas, NumPy, Scikit-learn : Manipulation et analyse des données
-  - Transformers (Hugging Face), BERT, Sentence-Transformers : NLP et embeddings
-  - FAISS, Vector Database : Recherche et indexation
-  - Large Language Models (LLM), Mistral via OpenAI API : Génération de texte
-  - Streamlit : Interface utilisateur web
-
-- **Processus** :
+Pour cela, j’ai mis en place un système hybride basé sur le NLP :
   1. Collecte et préparation des données médicales depuis Kaggle
   2. Traitement et nettoyage des données pour assurer la qualité
   3. Création d'embeddings pour la recherche sémantique
@@ -27,11 +24,18 @@ Dans le cadre du développement d'un assistant virtuel pour le domaine médical,
   5. Génération de réponses via des modèles de langage avancés
   6. Mise en place de garde-fous pour la sécurité médicale
   7. Interface utilisateur accessible via Streamlit
+
+- **Outils et technologies utilisés** :
+  - Pandas, NumPy, Scikit-learn : Manipulation et analyse des données
+  - Transformers (Hugging Face), BERT, Sentence-Transformers : NLP et embeddings
+  - FAISS, Vector Database : Recherche et indexation
+  - Large Language Models (LLM), Mistral via OpenAI API : Génération de texte
+  - Streamlit : Interface utilisateur web
  
 <img src="https://github.com/user-attachments/assets/c24aed73-b023-4e14-adc0-c967cfd74418" width="500">
 
 ## Analyse et Résultats
-- **Analyse des données** :
+- **Analyse des données médicales de référence** :
   - Statistiques descriptives : Distribution des données, valeurs manquantes
   - Analyse de qualité : Détection des doublons
   - Visualisations : Graphiques de distribution, nuages de mots
@@ -43,20 +47,16 @@ Dans le cadre du développement d'un assistant virtuel pour le domaine médical,
 
 ## Impact Business
 - **Valeur ajoutée** :
-  - Fourniture d'informations médicales fiables et précises
   - Amélioration de l'accessibilité des informations de santé
   - Réduction de la charge de travail des professionnels de santé pour les questions courantes
 
-- **Recommandations** :
+- **Prochaines pistes** :
   - Utilisation de modèles plus avancés pour la génération de réponses
-  - Personnalisation des réponses selon le profil utilisateur
+  - Personnalisation des réponses selon le profil utilisateur (age, contexte...)
   - Ajout de bases de données sur d'autres spécialités médicales
 
 ## Conclusion
-- **Résumé** :
-  - Développement d'un chatbot médical utilisant des techniques avancées de NLP et de recherche par similarité
-  - Implémentation réussie d'un système RAG avec BERT et génération de réponses via des LLM
-  - Mise en place de garde-fous pour assurer la sécurité médicale
+Ce projet m’a permis de combiner mes compétences en NLP, data science et éthique pour répondre à un vrai besoin. Il m’a aussi rappelé à quel point la qualité des données et la confiance utilisateur sont au cœur de toute solution dans le domaine médical.
 
 - **Leçons apprises** :
   - Importance de la qualité des données pour la génération de réponses précises
