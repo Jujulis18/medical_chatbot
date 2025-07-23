@@ -3,6 +3,7 @@ faiss-cpu
 sentence-transformers
 requests
 numpy
-openai
+openai>=1.3.7
 dotenv
 mistralai
+python-dotenv

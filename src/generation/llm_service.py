@@ -1,12 +1,10 @@
 from openai import OpenAI
-
-class MISTRALChatGenerator:
-    from openai import OpenAI
 import logging
 from typing import List, Optional
 
 class MISTRALChatGenerator:
     def __init__(self, api_key: str, model: str = "mistral-small-latest", debug: bool = False):
+        print(api_key, flush=True)
         self.client = OpenAI(
             api_key=api_key,
             base_url="https://api.mistral.ai/v1"
@@ -15,35 +13,27 @@ class MISTRALChatGenerator:
         self.debug = debug
         
         # Messages prédéfinis
-        self.greetings = ["bonjour", "salut", "hello", "bonsoir", "hey", "coucou"]
-        self.intro_message = """Bonjour ! Je suis votre assistant médical.
+        self.greetings = ["Hello", "Hi", "hi", "hello", "good morning"]
+        self.intro_message = """Hello! I’m your medical assistant.
+How can I help you today?
+• Answer your medical questions
+• Help you understand your symptoms
+• Explain medical terms
+• Provide information about treatments
 
-Que puis-je faire pour vous ?
-• Répondre à vos questions médicales
-• Vous aider avec des symptômes
-• Expliquer des termes médicaux
-• Fournir des informations sur les traitements
+Examples of questions:
+• “I have bruises—what can I do?”
+• “How can I treat back pain?”
+• “What is a cyst or gallstones?”
 
-Exemples de questions :
-- "Quels sont les symptômes de l'hypertension ?"
-- "Comment traiter une migraine ?"
-- "Qu'est-ce que le diabète de type 2 ?"
+Important: I do not replace professional medical advice. In case of emergency, please call 911."""
 
-Important : Je ne remplace pas un avis médical professionnel. En cas d'urgence, contactez le 15 (SAMU)."""
+        self.help_message = """ My capabilities:
 
-        self.help_message = """ Mes capacités :
-
-• Questions médicales : symptômes, maladies, traitements
-• Médicaments : posologie, effets secondaires, interactions  
-• Prévention : conseils santé, dépistage
-• Terminologie : explication de termes médicaux
-
-Comment bien me poser une question :
-- Soyez précis dans vos symptômes
-- Mentionnez la durée des symptômes
-- Indiquez votre âge si pertinent
-
-Rappel : Consultez toujours un professionnel pour un diagnostic ou traitement."""
+Medical questions: symptoms, diseases, treatments
+Prevention: health advice, screening
+Terminology: explanation of medical terms
+Reminder: Always consult a professional for a diagnosis or treatment."""
 
         # Configuration des logs
         if self.debug:
@@ -67,10 +57,11 @@ Rappel : Consultez toujours un professionnel pour un diagnostic ou traitement.""
             
             # Générer avec le contexte RAG
             return self._generate_with_context(question, context_chunks)
-            
+
+
         except Exception as e:
-            self._log_error(f"Erreur lors de la génération: {str(e)}")
-            return "Désolé, une erreur s'est produite. Pouvez-vous reformuler votre question ?"
+            print(f"Erreur lors de la génération: {str(e)}", flush=True)
+            return "Sorry, an error occurred. Could you please rephrase your question?"
     
     def _generate_with_context(self, question: str, context_chunks: List[str]) -> str:
         """Génère une réponse avec le contexte RAG"""
@@ -82,26 +73,21 @@ Rappel : Consultez toujours un professionnel pour un diagnostic ou traitement.""
         
         # Vérifier si on a du contexte 
         if not context.strip():
-            return """Information non trouvée
+            return """Information Not Found
 
-Je ne trouve pas d'information pertinente dans ma base de données médicale pour répondre à votre question.
+I cannot find relevant information in my medical database to answer your question.
 
-Suggestions :
-• Reformulez votre question avec d'autres termes
-• Vérifiez l'orthographe
-• Posez une question plus générale
-• Consultez un professionnel de santé"""
+Suggestions:
+
+Rephrase your question with different terms
+Check the spelling
+Ask a more general question
+Consult a healthcare professional"""
 
         # Construire le prompt
-        prompt = f"""Tu es un assistant médical expert. RÈGLES IMPORTANTES :
-
-1. UTILISE UNIQUEMENT les informations du contexte fourni
-2. Si l'information n'est PAS dans le contexte, dis clairement "Cette information n'est pas disponible dans ma base de données"
-3. Sois précis, clair et structuré dans tes réponses
-4. Toujours rappeler de consulter un professionnel pour un diagnostic
-5. En cas de doute, recommande une consultation médicale
-
-**CONTEXTE MÉDICAL :**
+        prompt = f"""You are an expert medical assistant. Answer the patient's question based solely on the context. 
+        Follow all system rules. Ensure that all information is present in the context.
+**MEDICAL CONTEXTE :**
 {context}
 
 **QUESTION :**
@@ -115,7 +101,15 @@ Suggestions :
                 messages=[
                     {
                         "role": "system", 
-                        "content": "Tu es un assistant médical prudent et précis. Tu ne donnes que des informations basées sur le contexte fourni."
+                        "content": """I'm an expert medical assistant. IMPORTANT RULES:
+
+USE ONLY the information from the provided context.
+If the information is NOT in the context, clearly state, "This information is not available in my database."
+Be precise, clear, and structured in your responses.
+Always remind to consult a professional for a diagnosis.
+In case of doubt, recommend a medical consultation.
+Mention only the medications listed in the context.
+"""
                     },
                     {
                         "role": "user", 
@@ -129,14 +123,15 @@ Suggestions :
             answer = response.choices[0].message.content.strip()
             
             # Ajouter un disclaimer si pas déjà présent
-            if "consulter" not in answer.lower() and "professionnel" not in answer.lower():
-                answer += "\n\nRappel : Consultez un professionnel de santé pour tout diagnostic ou traitement."
+            if "consult" not in answer.lower() and "professional" not in answer.lower():
+                answer += "\n\nReminder: Consult a healthcare professional for any diagnosis or treatment."
             
             return answer
-            
-        except Exception as e:
-            self._log_error(f"Erreur API Mistral: {str(e)}")
-            return "Erreur de communication avec l'IA. Veuillez réessayer."
+        
+        except Exception as e:            
+            print(f"[ERREUR API Mistral] {e}", flush=True)
+            #print(f"clé API utilisée : {os.getenv("MISTRAL_API_KEY")}")
+            return "Communication error with the AI. Please try again."
     
     def _is_greeting(self, question: str) -> bool:
         """Détecte si c'est une salutation"""
@@ -150,10 +145,9 @@ Suggestions :
     def _is_general_help_question(self, question: str) -> bool:
         """Détecte les questions d'aide générale"""
         help_patterns = [
-            "que peux-tu faire", "que peux tu faire", "aide moi", "aide-moi",
-            "comment ça marche", "qu'est-ce que tu fais", "tes capacités",
-            "que proposes-tu", "que proposes tu", "comment tu fonctionnes",
-            "quelles sont tes fonctions", "aide", "help"
+            "what can you do", "help me", "how does it work?", "what do you do",
+            "your capabilities", "what do you offer", "how do you work",
+            "what are your functions", "help"
         ]
         question_lower = question.lower()
         return any(pattern in question_lower for pattern in help_patterns)
@@ -164,36 +158,36 @@ Suggestions :
         
         # Urgences/suicide
         suicide_keywords = [
-            "suicide", "me tuer", "en finir", "plus envie de vivre", 
-            "mourir", "mettre fin", "pas envie de continuer"
+            "suicide", "kill myself", "end it all", "don't want to live anymore", 
+            "die", "put an end", "don't want to continue", "stop everything"
         ]
         if any(keyword in question_lower for keyword in suicide_keywords):
-            return """Aide immédiate disponible
+            return """Immediate Help Available
 
-Si vous traversez une crise :
-• Suicide Écoute : 01 45 39 40 00 (24h/24, gratuit)
-• SOS Amitié : 09 72 39 40 50 (24h/24)
-• 3114 : Numéro national de prévention du suicide (gratuit, 24h/24)
+If you are going through a crisis:
 
-Urgences médicales : 15 (SAMU) ou 112
+Suicide Écoute: 01 45 39 40 00 (24/7, free)
+SOS Amitié: 09 72 39 40 50 (24/7)
+3114: National suicide prevention hotline (free, 24/7)
+Medical emergencies: 911
 
-Vous n'êtes pas seul(e). Des professionnels sont là pour vous aider."""
+You are not alone. Professionals are there to help you."""
 
         # Urgences médicales
         emergency_keywords = [
-            "urgent", "urgence", "grave", "douleur intense", "ne peux plus respirer",
-            "perte de conscience", "malaise", "accident", "empoisonnement",
-            "overdose", "surdose", "hémorragie"
+            "urgent", "emergency", "serious", "severe pain", "can't breathe",
+            "loss of consciousness", "malaise", "accident", "poisoning",
+            "overdose", "hemorrhage"
         ]
         if any(keyword in question_lower for keyword in emergency_keywords):
-            return """Situation d'urgence médicale ?
+            return """Medical Emergency Situation?
 
-Contactez immédiatement :
-• 15 (SAMU) 
-• 112 (Numéros d'urgence européen)
-• Rendez-vous aux urgences les plus proches
+Contact immediately:
 
-Je ne peux pas évaluer les urgences médicales. N'attendez pas, contactez les secours maintenant."""
+911 (USA emergency number)
+Go to the nearest emergency room
+
+I cannot assess medical emergencies. Do not wait, contact emergency services now."""
 
         # Médicaments contrôlés
         controlled_meds = [
@@ -202,36 +196,33 @@ Je ne peux pas évaluer les urgences médicales. N'attendez pas, contactez les s
         ]
         if ("comment obtenir" in question_lower or "où acheter" in question_lower) and \
            any(med in question_lower for med in controlled_meds):
-            return """Médicaments sur ordonnance
+            return """Prescription Medications
 
-Ces médicaments nécessitent une **prescription médicale** pour votre sécurité :
-• Consultation avec un médecin
-• Évaluation de votre état de santé
-• Prescription adaptée à votre cas
+These medications require a medical prescription for your safety:
 
-Pourquoi ? Pour éviter :
-- Interactions dangereuses
-- Surdosage
-- Effets secondaires graves
-- Dépendance
+Consultation with a doctor
+Evaluation of your health condition
+Prescription tailored to your case
+Why? To avoid:
 
-Consultez votre médecin ou pharmacien."""
+Dangerous interactions
+Overdose
+Serious side effects
+Dependence
+Consult your doctor or pharmacist."""
 
         # Autodiagnostic dangereux
         dangerous_self_diagnosis = [
-            "j'ai un cancer", "c'est un cancer", "tumeur maligne",
-            "crise cardiaque", "infarctus", "avc", "accident vasculaire"
-        ]
+           "I have cancer", "it's a cancer", "tumor", "cancer", "heart attack", "stroke"]
         if any(phrase in question_lower for phrase in dangerous_self_diagnosis):
-            return """Diagnostic médical requis
+            return """Medical diagnosis required
 
-Les symptômes que vous décrivez nécessitent impérativement :
-• Un examen médical professionnel  
-• Des analyses complémentaires
-• Un diagnostic posé par un médecin
+The symptoms you describe absolutely require:
 
-Ne vous autodiagnostiquez pas pour des conditions graves.
-Consultez rapidement un médecin ou rendez-vous aux urgences si nécessaire."""
+A professional medical examination
+Additional tests
+A diagnosis made by a doctor
+Do not self-diagnose for serious conditions. Consult a doctor promptly or go to the emergency room if necessary."""
 
         return None
     
