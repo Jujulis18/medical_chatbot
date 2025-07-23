@@ -30,7 +30,7 @@ Pour cela, j’ai mis en place un système hybride basé sur le NLP :
   - Transformers (Hugging Face), BERT, Sentence-Transformers : NLP et embeddings
   - FAISS, Vector Database : Recherche et indexation
   - Large Language Models (LLM), Mistral via OpenAI API : Génération de texte
-  - Streamlit : Interface utilisateur web
+  - Streamlit : Interface utilisateur web [Streamlit](https://medicalchatbot-dr8qsucyifmvyhshnk5erh.streamlit.app/)
  
 <img src="https://github.com/user-attachments/assets/c24aed73-b023-4e14-adc0-c967cfd74418" width="500">
 
@@ -62,6 +62,28 @@ Ce projet m’a permis de combiner mes compétences en NLP, data science et éth
   - Importance de la qualité des données pour la génération de réponses précises
   - Nécessité de garde-fous stricts pour les applications médicales
   - Efficacité des modèles BERT pour la recherche sémantique
+
+## 🚀 Comment démarrer
+
+1. Clonez le dépôt 
+2. Installez les dépendances :
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Lancez le dashboard :
+
+```bash
+streamlit run app.py
+```
+
+3. Créer un fichier .env à la racine 
+```bash
+MISTRAL_API_KEY=YOUR_API_KEY
+```
+
+---
 
 ## Références et Liens
 - **Sources de données** :
