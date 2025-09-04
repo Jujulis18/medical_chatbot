@@ -1,39 +1,33 @@
 import streamlit as st
-from src.pipeline.retriever import Retriever
-from src.pipeline.generation.llm_service import MISTRALChatGenerator
-from src.pipeline.rag_pipeline import RAGPipeline
-from src.modules.sidebar_profile import show_filter_profile
-from src.modules.chatbot import show_chatbot
-import numpy as np
-import os
-import sys
-from dotenv import load_dotenv
+from src.pipeline.rag_index import create_index, query_llm
 
-# Empêcher Streamlit de surveiller les fichiers __pycache__
-if "__pycache__" not in sys.path:
-    sys.path.append("__pycache__")
+st.title("🤖 Chatbot Simple")
 
-
+# Initialisation du query engine
 @st.cache_resource
-def init_pipeline():
-	# Charger les variables d'environnement
-	load_dotenv()
-	api_key = os.getenv("MISTRAL_API_KEY")
-	if not api_key:
-	    raise ValueError("Clé API OpenAI non trouvée. Vérifiez votre fichier .env")
+def init_chatbot():
+    return create_index()
 
+query_engine = init_chatbot()
 
-	retriever = Retriever(model_name="sbert")
-	generator = MISTRALChatGenerator(api_key=api_key, model="mistral-small-latest")
-	return RAGPipeline(retriever, generator)
+# Interface de chat
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
+# Affichage des messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
 
-
-
-
-pipeline = init_pipeline()
-
-my_profile = show_filter_profile()
-
-my_chatbot = show_chatbot(pipeline)
-
+# Input utilisateur
+if user_input := st.chat_input("Votre question..."):
+    # Affichage du message utilisateur
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    with st.chat_message("user"):
+        st.write(user_input)
+    
+    # Réponse du bot
+    response = query_llm(query_engine, user_input)
+    st.session_state.messages.append({"role": "assistant", "content": response})
+    with st.chat_message("assistant"):
+        st.write(response)
